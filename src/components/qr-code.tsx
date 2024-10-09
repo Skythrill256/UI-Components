@@ -26,7 +26,6 @@ const EthereumQRCode = React.forwardRef<HTMLDivElement, EthereumQRCodeProps>(
   ({ className, onAddressChange, qrCodeSize = 200, qrCodeLevel = "L", qrCodeIncludeMargin = true, ...props }, ref) => {
     const [qrValue, setQrValue] = React.useState("")
 
-    // Use react-hook-form with Zod resolver
     const { register, handleSubmit, formState: { errors }, setValue } = useForm({
       resolver: zodResolver(ethereumAddressSchema),
     })
