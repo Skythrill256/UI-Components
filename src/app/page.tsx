@@ -14,9 +14,11 @@ const page = () => {
         onAddressChange={(address) => console.log("New address:", address)}
       />
       <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Token List</h1>
-      <TokenList />
-    </div>
+        <h1 className="text-2xl font-bold mb-4">Token List</h1>
+        <TokenList
+          maxHeight="400px"
+        />
+      </div>
     </div>
   )
 }
