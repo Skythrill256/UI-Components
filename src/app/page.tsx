@@ -17,6 +17,7 @@ const page = () => {
         <h1 className="text-2xl font-bold mb-4">Token List</h1>
         <TokenList
           maxHeight="400px"
+          className="bg-black text-white hover:blue"
         />
       </div>
     </div>
