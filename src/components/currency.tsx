@@ -1,112 +1,134 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { z } from "zod"
-import { useForm, Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 const ethereumBalanceSchema = z.object({
-  balance: z.string().regex(/^(\d*\.?\d{0,18})$/, "Invalid Ethereum balance"),
-  unit: z.enum(["ETH", "Gwei", "Wei"]),
+  eth: z.string().regex(/^\d*\.?\d*$/, "Invalid Ethereum balance"),
+  gwei: z.string().regex(/^\d*\.?\d*$/, "Invalid Gwei balance"),
+  wei: z.string().regex(/^\d*$/, "Invalid Wei balance"),
 })
 
+type ConversionUnit = "ETH" | "Gwei" | "Wei"
+
 export interface EthereumBalanceInputProps extends React.ComponentPropsWithoutRef<typeof Card> {
-  onBalanceChange?: (balance: string, unit: "ETH" | "Gwei" | "Wei") => void
-  initialUnit?: "ETH" | "Gwei" | "Wei"
+  onBalanceChange?: (conversions: Record<ConversionUnit, string>) => void
 }
 
 const EthereumBalanceInput = React.forwardRef<HTMLDivElement, EthereumBalanceInputProps>(
-  ({ className, onBalanceChange, initialUnit = "ETH", ...props }, ref) => {
-    const { register, handleSubmit, formState: { errors }, control, watch, setValue } = useForm({
+  ({ className, onBalanceChange, ...props }, ref) => {
+    const { register, setValue, watch, formState: { errors } } = useForm({
       resolver: zodResolver(ethereumBalanceSchema),
       defaultValues: {
-        balance: "",
-        unit: initialUnit,
+        eth: "",
+        gwei: "",
+        wei: "",
       },
     })
 
-    const unit = watch("unit")
+    const eth = watch("eth")
+    const gwei = watch("gwei")
+    const wei = watch("wei")
 
-    const onSubmit = (data: { balance: string; unit: "ETH" | "Gwei" | "Wei" }) => {
-      onBalanceChange?.(data.balance, data.unit)
-    }
+    const convertBalance = (value: string, from: ConversionUnit): Record<ConversionUnit, string> => {
+      if (!value || isNaN(Number(value))) return { ETH: "", Gwei: "", Wei: "" }
 
-    const handleUnitChange = (newUnit: "ETH" | "Gwei" | "Wei") => {
-      const currentBalance = watch("balance")
-      if (currentBalance) {
-        const etherValue = parseFloat(currentBalance)
-        let newBalance: string
-        switch (newUnit) {
+      let weiValue: bigint
+      try {
+        switch (from) {
           case "ETH":
-            newBalance = unit === "Gwei" ? (etherValue / 1e9).toString() : (etherValue / 1e18).toString()
+            weiValue = BigInt(Math.floor(parseFloat(value) * 1e18))
             break
           case "Gwei":
-            newBalance = unit === "ETH" ? (etherValue * 1e9).toString() : (etherValue / 1e9).toString()
+            weiValue = BigInt(Math.floor(parseFloat(value) * 1e9))
             break
           case "Wei":
-            newBalance = unit === "ETH" ? (etherValue * 1e18).toString() : (etherValue * 1e9).toString()
+            weiValue = BigInt(value)
             break
         }
-        setValue("balance", newBalance)
+      } catch (error) {
+        console.error("Conversion error:", error)
+        return { ETH: "", Gwei: "", Wei: "" }
       }
-      setValue("unit", newUnit)
+
+      return {
+        ETH: (Number(weiValue) / 1e18).toFixed(18),
+        Gwei: (Number(weiValue) / 1e9).toFixed(9),
+        Wei: weiValue.toString(),
+      }
     }
+
+    const updateValues = (value: string, from: ConversionUnit) => {
+      const conversions = convertBalance(value, from)
+      if (from !== "ETH") setValue("eth", conversions.ETH)
+      if (from !== "Gwei") setValue("gwei", conversions.Gwei)
+      if (from !== "Wei") setValue("wei", conversions.Wei)
+      onBalanceChange?.(conversions)
+    }
+
+    React.useEffect(() => {
+      updateValues(eth, "ETH")
+    }, [eth])
+
+    React.useEffect(() => {
+      updateValues(gwei, "Gwei")
+    }, [gwei])
+
+    React.useEffect(() => {
+      updateValues(wei, "Wei")
+    }, [wei])
 
     return (
       <Card ref={ref} className={cn("w-full max-w-md mx-auto", className)} {...props}>
         <CardHeader>
-          <CardTitle>Ethereum Balance Input</CardTitle>
-          <CardDescription>Enter your Ethereum balance and select the unit</CardDescription>
+          <CardTitle>Ethereum Balance Converter</CardTitle>
+          <CardDescription>Enter a value in any unit to see conversions</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="balance">Ethereum Balance</Label>
-              <div className="flex">
-                <Input
-                  id="balance"
-                  placeholder={`Enter amount in ${unit}`}
-                  {...register("balance")}
-                  className={cn(
-                    "rounded-r-none",
-                    errors.balance && "border-red-500 focus-visible:ring-red-500"
-                  )}
-                />
-                <Controller
-                  name="unit"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      onValueChange={(value: "ETH" | "Gwei" | "Wei") => {
-                        field.onChange(value)
-                        handleUnitChange(value)
-                      }}
-                      value={field.value}
-                    >
-                      <SelectTrigger className="w-[100px] rounded-l-none">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ETH">ETH</SelectItem>
-                        <SelectItem value="Gwei">Gwei</SelectItem>
-                        <SelectItem value="Wei">Wei</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              {errors.balance && (
-                <p className="text-red-500 text-sm">{errors.balance.message}</p>
+              <Label htmlFor="eth">ETH</Label>
+              <Input
+                id="eth"
+                placeholder="Enter amount in ETH"
+                {...register("eth")}
+                className={cn(errors.eth && "border-red-500 focus-visible:ring-red-500")}
+              />
+              {errors.eth && (
+                <p className="text-red-500 text-sm">{errors.eth.message}</p>
               )}
             </div>
-            <Button type="submit" className="w-full">Submit Balance</Button>
-          </form>
+            <div className="space-y-2">
+              <Label htmlFor="gwei">Gwei</Label>
+              <Input
+                id="gwei"
+                placeholder="Enter amount in Gwei"
+                {...register("gwei")}
+                className={cn(errors.gwei && "border-red-500 focus-visible:ring-red-500")}
+              />
+              {errors.gwei && (
+                <p className="text-red-500 text-sm">{errors.gwei.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="wei">Wei</Label>
+              <Input
+                id="wei"
+                placeholder="Enter amount in Wei"
+                {...register("wei")}
+                className={cn(errors.wei && "border-red-500 focus-visible:ring-red-500")}
+              />
+              {errors.wei && (
+                <p className="text-red-500 text-sm">{errors.wei.message}</p>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
     )
