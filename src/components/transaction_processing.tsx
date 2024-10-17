@@ -16,7 +16,7 @@ type TransactionConfirmationProps = HTMLMotionProps<"div"> & {
   destinationText?: string
   primaryColor?: string
   secondaryColor?: string
-  modalClassName?: string // Allows external control over modal styles
+  modalClassName?: string
 }
 
 const TransactionConfirmation = React.forwardRef<HTMLDivElement, TransactionConfirmationProps>(({
@@ -55,7 +55,7 @@ const TransactionConfirmation = React.forwardRef<HTMLDivElement, TransactionConf
         transition={{ duration: 0.3 }}
         className={cn(
           "fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50",
-          className // Allowing customization from the outside
+          className
         )}
         {...props}
       >
