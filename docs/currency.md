@@ -1,12 +1,12 @@
-# Ethereum Balance Converter Component
+# Currency Converter Component
 
 ## Overview
 
-`EthereumBalanceInput` is a React component that allows users to input and convert Ethereum balances across three units: ETH, Gwei, and Wei. This component provides real-time validation and conversion for Ethereum balance values entered by the user in any of the three units.
+`Currency-Converter` is a React component that allows users to input and convert Ethereum balances across three units: ETH, Gwei, and Wei. This component provides real-time validation and conversion for Ethereum balance values entered by the user in any of the three units.
 
 ## Usage
 
-To use the `EthereumBalanceInput` component in your project, import the component and add it to your page or layout. The component takes optional props for handling balance conversions and can be customized with CSS classes.
+To use the `Currency-Converter` component in your project, import the component and add it to your page or layout. The component takes optional props for handling balance conversions and can be customized with CSS classes.
 
 ### Example
 
