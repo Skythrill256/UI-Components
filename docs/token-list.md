@@ -38,3 +38,96 @@ interface Token {
   decimals: number
   logoURI: string
 }
+```
+
+## Example-usage
+
+```tsx
+import { TokenList } from "./TokenList"
+
+export default function App() {
+  const handleTokenSelect = (token) => {
+    console.log("Selected Token:", token)
+  }
+
+  return (
+    <div className="p-8">
+      <h1 className="text-xl font-bold mb-4">Select a Token</h1>
+      <TokenList
+        onSelectToken={handleTokenSelect}
+        maxHeight="400px"
+        minHeight="300px"
+      />
+    </div>
+  )
+}
+```
+In the example above:
+
+1. The TokenList component is rendered with a maxHeight of 400px and a minHeight of 300px.
+2. When a token is selected, the handleTokenSelect function is triggered, logging the selected token to the console.
+
+### Using custom tokens
+
+```tsx
+const customTokenList = [
+  {
+    chainId: 1,
+    address: "0x1234567890abcdef1234567890abcdef12345678",
+    name: "Custom Token 1",
+    symbol: "CT1",
+    decimals: 18,
+    logoURI: "https://example.com/ct1-logo.png",
+  },
+  {
+    chainId: 56,
+    address: "0xabcdefabcdefabcdefabcdefabcdefabcdef",
+    name: "Custom Token 2",
+    symbol: "CT2",
+    decimals: 18,
+    logoURI: "https://example.com/ct2-logo.png",
+  },
+]
+
+export default function App() {
+  return (
+    <div>
+      <TokenList customTokens={customTokenList} />
+    </div>
+  )
+}
+```
+This example showcases how you can pass a custom list of tokens to the TokenList component. The tokens will be displayed and can be searched or filtered by chain.
+
+### Hiding Network Filter
+
+If you don't want the network filter to be shown, you can hide it by setting the showNetworkFilter prop to false.
+
+```tsx
+<TokenList showNetworkFilter={false} />
+```
+This will hide the network selector, allowing all tokens to be displayed without filtering by chain.
+
+## Customization
+
+You can customize the styling of the TokenList component by passing custom CSS classes via the className prop.
+
+```tsx
+<TokenList className="my-custom-class" />
+```
+
+### Customizing the chain names
+
+To modify or expand the available chains in the filter dropdown, you can pass your own chainIdToName mapping.
+
+```tsx
+const customChainMapping = {
+  1: "Ethereum",
+  56: "BNB Chain",
+  137: "Polygon",
+  43114: "Avalanche",
+}
+
+<TokenList chainIdToName={customChainMapping} />
+```
+This example adds support for Avalanche (Chain ID 43114) and displays the appropriate chain names.
