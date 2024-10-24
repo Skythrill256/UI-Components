@@ -1,0 +1,14 @@
+
+{
+  "compilerOptions": {
+    "target": "ES2020", // or any other ES version you prefer
+    "module": "commonjs", // for Node.js
+    "strict": true, // enable strict type checking
+    "esModuleInterop": true, // for compatibility with ES modules
+    "skipLibCheck": true, // skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // enforce consistent file casing
+    "outDir": "./dist",
+  },
+  "include": ["src/**/*"], // include your TypeScript files
+  "exclude": ["node_modules"] // exclude node_modules
+}
